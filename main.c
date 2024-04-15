@@ -10,7 +10,7 @@ typedef struct tnode
 
 tnode *insertValue(tnode *root, int value)
 {
-    // if root is null, create a new node (exit clause)
+    // if root is null, create a new node (base case)
     if (root == NULL)
     {
         tnode *newNode = (tnode *)malloc(sizeof(tnode));
@@ -80,17 +80,35 @@ int bal(tnode *root)
     return balance;
 }
 
+// postorder (right then left), calculate balance, store value for min/max/avg later
+void postOrder(tnode *root)
+{
+    if (root == NULL)
+    {
+        return;
+    }
+    postOrder(root->right);
+    postOrder(root->left);
+    printf("bal(%d)=%d", root->key, bal(root));
+    if (bal(root) > 1 || bal(root) < -1)
+    {
+        printf(" (AVL violation!)");
+    }
+    printf("\n");
+    // add number to list for min/max/avg
+}
+
 int main()
 {
 
     tnode *root = NULL;
     char *filename = "input.txt";
-
     root = inputFile(filename, root);
+    postOrder(root);
 
-    int depth = maxDepth(root);
-    printf("depth of root: %d\n", depth);
-    printf("balance factor of %d: %d", root->key, bal(root));
+    // int depth = maxDepth(root);
+    // printf("depth of root: %d\n", depth);
+    // printf("balance factor of %d: %d", root->key, bal(root));
 
     return 0;
 }
