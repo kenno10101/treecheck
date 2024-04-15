@@ -36,7 +36,7 @@ tnode *insertValue(tnode *root, int value)
     }
 }
 
-void inputFile(char *filename, tnode *root)
+tnode *inputFile(char *filename, tnode *root)
 {
     int value;
     FILE *f;
@@ -49,9 +49,11 @@ void inputFile(char *filename, tnode *root)
     {
         while (fscanf(f, "%d", &value) == 1)
         {
+            // printf("read value: %d\n", value);
             root = insertValue(root, value);
         }
     }
+    return root;
 }
 
 int maxDepth(tnode *root)
@@ -84,21 +86,11 @@ int main()
     tnode *root = NULL;
     char *filename = "input.txt";
 
-    // inputFile(filename, root);
-    root = insertValue(root, 5);
-    root = insertValue(root, 3);
-    root = insertValue(root, 17);
-    root = insertValue(root, 9);
-    root = insertValue(root, 23);
-    root = insertValue(root, 54);
-    root = insertValue(root, 11);
-    root = insertValue(root, 79);
-    root = insertValue(root, 30);
-    root = insertValue(root, 12);
+    root = inputFile(filename, root);
 
     int depth = maxDepth(root);
     printf("depth of root: %d\n", depth);
-    printf("balance factor of %d: %d", root->right->right->right->right->key, bal(root->right->right->right->right));
+    printf("balance factor of %d: %d", root->key, bal(root));
 
     return 0;
 }
