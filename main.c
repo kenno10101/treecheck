@@ -75,6 +75,7 @@ tnode *inputFile(char *filename, tnode *root)
     return root;
 }
 
+// calculate max depth of a tree
 int maxDepth(tnode *root)
 {
     if (root == NULL)
@@ -93,13 +94,14 @@ int maxDepth(tnode *root)
     }
 }
 
+// calculate balance of a node (right depth - left depth)
 int bal(tnode *root)
 {
     int balance = maxDepth(root->right) - maxDepth(root->left);
     return balance;
 }
 
-// postorder (right then left), calculate balance, store value for min/max/avg later
+// postorder (but right then left), calculate balance, store value for min/max/avg later
 void postOrder(tnode *root, node **head, int *avlViolation)
 {
     if (root == NULL)
@@ -109,6 +111,7 @@ void postOrder(tnode *root, node **head, int *avlViolation)
     postOrder(root->right, head, avlViolation);
     postOrder(root->left, head, avlViolation);
     printf("bal(%d)=%d", root->key, bal(root));
+    // set AVL violation flag if balance is greater than 1 or less than -1
     if (bal(root) > 1 || bal(root) < -1)
     {
         *avlViolation = 1;
@@ -119,7 +122,8 @@ void postOrder(tnode *root, node **head, int *avlViolation)
     *head = addNode(*head, root->key);
 }
 
-void printStats(node *head)
+// print if avl and min/max/avg
+void printStats(node *head, int *avlViolation)
 {
     int min = head->value, max = head->value;
     float counter = 0, sum = 0;
@@ -143,6 +147,14 @@ void printStats(node *head)
         head = head->next;
     }
     float avg = sum / counter;
+    if (*avlViolation == 0)
+    {
+        printf("AVL: yes\n");
+    }
+    else
+    {
+        printf("AVL: no\n");
+    }
     printf("min: %d, max: %d, avg: %.1f\n", min, max, avg);
 }
 
@@ -155,19 +167,7 @@ int main()
     char *filename = "input.txt";
     root = inputFile(filename, root);
     postOrder(root, &head, &avlViolation);
-    if (avlViolation == 0)
-    {
-        printf("AVL: yes\n");
-    }
-    else
-    {
-        printf("AVL: no\n");
-    }
-    printStats(head);
-
-    // int depth = maxDepth(root);
-    // printf("depth of root: %d\n", depth);
-    // printf("balance factor of %d: %d", root->key, bal(root));
+    printStats(head, &avlViolation);
 
     return 0;
 }
