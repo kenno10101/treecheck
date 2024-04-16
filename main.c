@@ -101,7 +101,7 @@ int bal(tnode *root)
     return balance;
 }
 
-// postorder (but right then left), calculate balance, store value for min/max/avg later
+// reverse-postorder (right then left), calculate balance, store value for min/max/avg later
 void postOrder(tnode *root, node **head, int *avlViolation)
 {
     if (root == NULL)
@@ -158,6 +158,30 @@ void printStats(node *head, int *avlViolation)
     printf("min: %d, max: %d, avg: %.1f\n", min, max, avg);
 }
 
+void nodeSearch(tnode *root, int searchKey)
+{
+    if (root == NULL)
+    {
+        printf("%d not found!\n", searchKey);
+        return;
+    }
+    if (searchKey == root->key)
+    {
+        printf("%d found ", searchKey);
+        // implement function to print the subtree of the searchKey
+
+        printf("\n");
+        return;
+    }
+    if (searchKey < root->key)
+    {
+        nodeSearch(root->left, searchKey);
+    }
+    else
+    {
+        nodeSearch(root->right, searchKey);
+    }
+}
 int main()
 {
 
@@ -168,6 +192,11 @@ int main()
     root = inputFile(filename, root);
     postOrder(root, &head, &avlViolation);
     printStats(head, &avlViolation);
+    nodeSearch(root, 7);
+    nodeSearch(root, 30);
+    nodeSearch(root, 29);
+    nodeSearch(root, 16);
+    nodeSearch(root, 17);
 
     return 0;
 }
