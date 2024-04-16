@@ -27,6 +27,49 @@ node *addNode(node *head, int value)
     return newNode;
 }
 
+node *addLastNode(node *head, int value)
+{
+    node *newNode = (node *)malloc(sizeof(node));
+    newNode->value = value;
+    newNode->next = NULL;
+    if (head == NULL)
+    {
+        return newNode;
+    }
+    node *current = head;
+    while (current->next != NULL)
+    {
+        current = current->next;
+    }
+    current->next = newNode;
+    return head;
+}
+
+// to prevent memory leak
+node *deleteList(node *head)
+{
+}
+
+void printList(node *head)
+{
+    if (head == NULL)
+    {
+        return;
+    }
+    while (head != NULL)
+    {
+        if (head->next == NULL)
+        {
+            printf("%d", head->value);
+            break;
+        }
+        printf("%d, ", head->value);
+        head = head->next;
+    }
+    printf("\n");
+    return;
+}
+
 tnode *insertValue(tnode *root, int value)
 {
     // if root is null, create a new node (base case)
@@ -53,6 +96,11 @@ tnode *insertValue(tnode *root, int value)
     {
         root->right = insertValue(root->right, value);
     }
+}
+
+// to prevent memory leak
+tnode *deleteTree(tnode *root)
+{
 }
 
 tnode *inputFile(char *filename, tnode *root)
@@ -158,45 +206,54 @@ void printStats(node *head, int *avlViolation)
     printf("min: %d, max: %d, avg: %.1f\n", min, max, avg);
 }
 
-void nodeSearch(tnode *root, int searchKey)
+// preorder traversal search and store the root-keys for the subtree
+void nodeSearch(tnode *root, int searchKey, node **subtreeHead)
 {
     if (root == NULL)
     {
+        // free memory of linked list (subtreeHead)
         printf("%d not found!\n", searchKey);
         return;
     }
+    // add root->key to linked list
+    *subtreeHead = addLastNode(*subtreeHead, root->key);
     if (searchKey == root->key)
     {
         printf("%d found ", searchKey);
-        // implement function to print the subtree of the searchKey
-
+        // print the subtree of the searchKey (linked list)
+        printList(*subtreeHead);
+        // free memory of linked list (subtreeHead)
         printf("\n");
         return;
     }
     if (searchKey < root->key)
     {
-        nodeSearch(root->left, searchKey);
+        nodeSearch(root->left, searchKey, subtreeHead);
     }
     else
     {
-        nodeSearch(root->right, searchKey);
+        nodeSearch(root->right, searchKey, subtreeHead);
     }
 }
+
 int main()
 {
-
+    // part 1
     tnode *root = NULL;
+    // linked list for storing treenodes for printing stats
     node *head = NULL;
     int avlViolation = 0;
     char *filename = "input.txt";
     root = inputFile(filename, root);
     postOrder(root, &head, &avlViolation);
     printStats(head, &avlViolation);
-    nodeSearch(root, 7);
-    nodeSearch(root, 30);
-    nodeSearch(root, 29);
-    nodeSearch(root, 16);
-    nodeSearch(root, 17);
+    // free linked list (head)
+
+    // part 2
+    // linked list to store the subtree of searchKey
+    node *subtreeHead = NULL;
+    int searchKey = 12;
+    nodeSearch(root, searchKey, &subtreeHead);
 
     return 0;
 }
