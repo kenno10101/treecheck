@@ -46,8 +46,15 @@ node *addLastNode(node *head, int value)
 }
 
 // to prevent memory leak
-node *deleteList(node *head)
+void deleteList(node *head)
 {
+    node *temp;
+    while (head != NULL)
+    {
+        temp = head;
+        head = head->next;
+        free(temp);
+    }
 }
 
 void printList(node *head)
@@ -66,7 +73,6 @@ void printList(node *head)
         printf("%d, ", head->value);
         head = head->next;
     }
-    printf("\n");
     return;
 }
 
@@ -98,16 +104,22 @@ tnode *insertValue(tnode *root, int value)
     }
 }
 
-// to prevent memory leak
-tnode *deleteTree(tnode *root)
+// Function to delete an AVL tree
+void deleteTree(tnode *root)
 {
+    if (root == NULL)
+    {
+        return;
+    }
+    deleteTree(root->left);
+    deleteTree(root->right);
+    free(root);
 }
 
 tnode *inputFile(char *filename, tnode *root)
 {
     int value;
-    FILE *f;
-    f = fopen("input.txt", "r");
+    FILE *f = fopen(filename, "r");
     if (f == NULL)
     {
         printf("Error opening file\n");
@@ -120,6 +132,7 @@ tnode *inputFile(char *filename, tnode *root)
             root = insertValue(root, value);
         }
     }
+    fclose(f);
     return root;
 }
 
@@ -158,6 +171,7 @@ void postOrder(tnode *root, node **head, int *avlViolation)
     }
     postOrder(root->right, head, avlViolation);
     postOrder(root->left, head, avlViolation);
+
     printf("bal(%d)=%d", root->key, bal(root));
     // set AVL violation flag if balance is greater than 1 or less than -1
     if (bal(root) > 1 || bal(root) < -1)
@@ -206,7 +220,7 @@ void printStats(node *head, int *avlViolation)
     printf("min: %d, max: %d, avg: %.1f\n", min, max, avg);
 }
 
-// preorder traversal search and store the root-keys for the subtree
+// preorder traversal search and store the each key for the subtree
 void nodeSearch(tnode *root, int searchKey, node **subtreeHead)
 {
     if (root == NULL)
@@ -223,6 +237,7 @@ void nodeSearch(tnode *root, int searchKey, node **subtreeHead)
         // print the subtree of the searchKey (linked list)
         printList(*subtreeHead);
         // free memory of linked list (subtreeHead)
+        deleteList(*subtreeHead);
         printf("\n");
         return;
     }
@@ -233,6 +248,39 @@ void nodeSearch(tnode *root, int searchKey, node **subtreeHead)
     else
     {
         nodeSearch(root->right, searchKey, subtreeHead);
+    }
+}
+
+// Function to check if the given subtree is present in the main tree
+int checkSubtree(tnode *mainRoot, tnode *subRoot)
+{
+    if (subRoot == NULL)
+    {
+        return 1;
+    }
+    if (mainRoot == NULL)
+    {
+        return 0;
+    }
+
+    if (mainRoot->key == subRoot->key)
+    {
+        return checkSubtree(mainRoot->left, subRoot->left) && checkSubtree(mainRoot->right, subRoot->right);
+    }
+
+    return checkSubtree(mainRoot->left, subRoot) || checkSubtree(mainRoot->right, subRoot);
+}
+
+// Function to print the result if the given subtree is present in the main tree
+void subtreeSearch(tnode *mainRoot, tnode *subRoot)
+{
+    if (checkSubtree(mainRoot, subRoot))
+    {
+        printf("Subtree found\n");
+    }
+    else
+    {
+        printf("Subtree not found!\n");
     }
 }
 
@@ -247,13 +295,23 @@ int main()
     root = inputFile(filename, root);
     postOrder(root, &head, &avlViolation);
     printStats(head, &avlViolation);
-    // free linked list (head)
 
     // part 2
     // linked list to store the subtree of searchKey
     node *subtreeHead = NULL;
-    int searchKey = 12;
+    // search for a single key
+    int searchKey = 7;
     nodeSearch(root, searchKey, &subtreeHead);
+
+    // search for a subtree
+    tnode *subRoot = NULL;
+    char *subtreeFilename = "subtree.txt";
+    subRoot = inputFile(subtreeFilename, subRoot);
+    subtreeSearch(root, subRoot);
+
+    // free linked list (head) and tree (root)
+    deleteList(head);
+    deleteTree(root);
 
     return 0;
 }
