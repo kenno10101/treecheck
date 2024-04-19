@@ -15,19 +15,6 @@ typedef struct node
     struct node *next;
 } node;
 
-node *addNode(node *head, int value)
-{
-    node *newNode = (node *)malloc(sizeof(node));
-    newNode->value = value;
-    newNode->next = NULL;
-    if (head == NULL)
-    {
-        return newNode;
-    }
-    newNode->next = head;
-    return newNode;
-}
-
 node *addLastNode(node *head, int value)
 {
     node *newNode = (node *)malloc(sizeof(node));
@@ -163,16 +150,17 @@ int bal(tnode *root)
     return balance;
 }
 
-// reverse-postorder (right then left), calculate balance, store value for min/max/avg later
-void postOrder(tnode *root, node **head, int *avlViolation)
+// traverse tree in reverse-postorder, calculate balance, store value for min/max/avg later
+void postOrder(tnode *root, int *avlViolation, int *min, int *max, float *sum, float *counter)
 {
     if (root == NULL)
     {
         return;
     }
-    postOrder(root->right, head, avlViolation);
-    postOrder(root->left, head, avlViolation);
+    postOrder(root->right, avlViolation, min, max, sum, counter);
+    postOrder(root->left, avlViolation, min, max, sum, counter);
 
+    // calculate balance
     printf("bal(%d)=%d", root->key, bal(root));
     // set AVL violation flag if balance is greater than 1 or less than -1
     if (bal(root) > 1 || bal(root) < -1)
@@ -181,44 +169,18 @@ void postOrder(tnode *root, node **head, int *avlViolation)
         printf(" (AVL violation!)");
     }
     printf("\n");
-    // add number to list for min/max/avg
-    *head = addNode(*head, root->key);
-}
 
-// print if avl and min/max/avg
-void printStats(node *head, int *avlViolation)
-{
-    int min = head->value, max = head->value;
-    float counter = 0, sum = 0;
-
-    if (head == NULL)
+    // calculate statistics
+    (*counter)++;
+    *sum += root->key;
+    if (root->key < *min)
     {
-        return;
+        *min = root->key;
     }
-    while (head != NULL)
+    else if (root->key > *max)
     {
-        sum += head->value;
-        counter++;
-        if (head->value < min)
-        {
-            min = head->value;
-        }
-        if (head->value > max)
-        {
-            max = head->value;
-        }
-        head = head->next;
+        *max = root->key;
     }
-    float avg = sum / counter;
-    if (*avlViolation == 0)
-    {
-        printf("AVL: yes\n");
-    }
-    else
-    {
-        printf("AVL: no\n");
-    }
-    printf("min: %d, max: %d, avg: %.1f\n", min, max, avg);
 }
 
 // preorder traversal search and store the each key for the subtree
@@ -290,17 +252,26 @@ int main(int argc, char *argv[])
     {
         // part 1
         tnode *root = NULL;
-        node *head = NULL; // linked list for storing treenodes for printing stats
-        int avlViolation = 0;
         char *filename = argv[1];
 
         root = inputFile(filename, root);
 
-        postOrder(root, &head, &avlViolation);
-        printStats(head, &avlViolation);
+        int avlViolation = 0;
+        int min = root->key, max = root->key;
+        float counter = 0, sum = 0;
+        postOrder(root, &avlViolation, &min, &max, &sum, &counter);
 
-        deleteList(head); // free linked list (head) and tree (root)
-        deleteTree(root);
+        if (avlViolation == 0)
+        {
+            printf("AVL: yes\n");
+        }
+        else
+        {
+            printf("AVL: no\n");
+        }
+        printf("min: %d, max: %d, avg: %.1f\n", min, max, sum / counter);
+
+        deleteTree(root); // free tree (root)
     }
     else if (argc == 3 && strcmp(argv[0], "treecheck") == 0)
     {
