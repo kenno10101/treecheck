@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 typedef struct tnode
 {
@@ -236,8 +237,6 @@ void nodeSearch(tnode *root, int searchKey, node **subtreeHead)
         printf("%d found ", searchKey);
         // print the subtree of the searchKey (linked list)
         printList(*subtreeHead);
-        // free memory of linked list (subtreeHead)
-        deleteList(*subtreeHead);
         printf("\n");
         return;
     }
@@ -284,34 +283,57 @@ void subtreeSearch(tnode *mainRoot, tnode *subRoot)
     }
 }
 
-int main()
+int main(int argc, char *argv[])
 {
-    // part 1
-    tnode *root = NULL;
-    // linked list for storing treenodes for printing stats
-    node *head = NULL;
-    int avlViolation = 0;
-    char *filename = "input.txt";
-    root = inputFile(filename, root);
-    postOrder(root, &head, &avlViolation);
-    printStats(head, &avlViolation);
+    // printf("type: \"treecheck\" <input filename> <subtree filename (optional)>");
+    if (argc == 2 && strcmp(argv[0], "treecheck") == 0)
+    {
+        // part 1
+        tnode *root = NULL;
+        node *head = NULL; // linked list for storing treenodes for printing stats
+        int avlViolation = 0;
+        char *filename = argv[1];
 
-    // part 2
-    // linked list to store the subtree of searchKey
-    node *subtreeHead = NULL;
-    // search for a single key
-    int searchKey = 7;
-    nodeSearch(root, searchKey, &subtreeHead);
+        root = inputFile(filename, root);
 
-    // search for a subtree
-    tnode *subRoot = NULL;
-    char *subtreeFilename = "subtree.txt";
-    subRoot = inputFile(subtreeFilename, subRoot);
-    subtreeSearch(root, subRoot);
+        postOrder(root, &head, &avlViolation);
+        printStats(head, &avlViolation);
 
-    // free linked list (head) and tree (root)
-    deleteList(head);
-    deleteTree(root);
+        deleteList(head); // free linked list (head) and tree (root)
+        deleteTree(root);
+    }
+    else if (argc == 3 && strcmp(argv[0], "treecheck") == 0)
+    {
+        // part 2
+        tnode *root = NULL;
+        tnode *subRoot = NULL;
+        char *filename = argv[1];
+        char *subtreeFilename = argv[2];
 
+        root = inputFile(filename, root);              // create a tree from the searchtree file
+        subRoot = inputFile(subtreeFilename, subRoot); // create a tree from the subtree file
+
+        if (subRoot != NULL && subRoot->left == NULL && subRoot->right == NULL)
+        {
+            // search for a single key
+            node *subtreeHead = NULL; // linked list to store the subtree of searchKey
+            int searchKey = subRoot->key;
+            nodeSearch(root, searchKey, &subtreeHead);
+
+            deleteList(subtreeHead);
+        }
+        else if (subRoot != NULL && (subRoot->left != NULL || subRoot->right != NULL))
+        {
+            // search for a subtree
+            subtreeSearch(root, subRoot);
+        }
+
+        deleteTree(subRoot); // free memory
+        deleteTree(root);
+    }
+    else
+    {
+        printf("invalid input\ntype: treecheck <input filename> <subtree filename (optional)>");
+    }
     return 0;
 }
