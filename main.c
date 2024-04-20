@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+// Structore of a node for a binary (search) tree
 typedef struct tnode
 {
     int key;
@@ -9,12 +10,14 @@ typedef struct tnode
     struct tnode *right;
 } tnode;
 
+// Structure of a node for a linked list
 typedef struct node
 {
     int value;
     struct node *next;
 } node;
 
+// Function to add a Node to the last position (used in nodeSearch)
 node *addLastNode(node *head, int value)
 {
     node *newNode = (node *)malloc(sizeof(node));
@@ -45,6 +48,7 @@ void deleteList(node *head)
     }
 }
 
+// Function to print the elements of a linked list (used in nodeSearch)
 void printList(node *head)
 {
     if (head == NULL)
@@ -64,6 +68,7 @@ void printList(node *head)
     return;
 }
 
+// Function to insert a value to a binary search tree
 tnode *insertValue(tnode *root, int value)
 {
     // if root is null, create a new node (base case)
@@ -92,18 +97,7 @@ tnode *insertValue(tnode *root, int value)
     }
 }
 
-// Function to delete an AVL tree
-void deleteTree(tnode *root)
-{
-    if (root == NULL)
-    {
-        return;
-    }
-    deleteTree(root->left);
-    deleteTree(root->right);
-    free(root);
-}
-
+// Function to insert values to a binary search tree from a textfile
 tnode *inputFile(char *filename, tnode *root)
 {
     int value;
@@ -122,6 +116,18 @@ tnode *inputFile(char *filename, tnode *root)
     }
     fclose(f);
     return root;
+}
+
+// Function to delete an AVL tree
+void deleteTree(tnode *root)
+{
+    if (root == NULL)
+    {
+        return;
+    }
+    deleteTree(root->left);
+    deleteTree(root->right);
+    free(root);
 }
 
 // calculate max depth of a tree
@@ -247,7 +253,6 @@ void subtreeSearch(tnode *mainRoot, tnode *subRoot)
 
 int main(int argc, char *argv[])
 {
-    // printf("type: \"treecheck\" <input filename> <subtree filename (optional)>");
     if (argc == 2 && strcmp(argv[0], "treecheck") == 0)
     {
         // part 1
@@ -271,7 +276,7 @@ int main(int argc, char *argv[])
         }
         printf("min: %d, max: %d, avg: %.1f\n", min, max, sum / counter);
 
-        deleteTree(root); // free tree (root)
+        deleteTree(root); // free memory of tree (root)
     }
     else if (argc == 3 && strcmp(argv[0], "treecheck") == 0)
     {
