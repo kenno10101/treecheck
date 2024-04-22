@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Structore of a node for a binary (search) tree
+// Structure of a node for a binary (search) tree
 typedef struct tnode
 {
     int key;
